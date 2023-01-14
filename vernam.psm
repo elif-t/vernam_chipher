@@ -1,70 +1,49 @@
-; Define the memory locations for the message and ciphertext
-equ message_ptr, 0x00
-equ ciphertext_ptr, 0x20
-equ key_ptr, 0x40
+#ifDef proc::xPblze6
 
-; Define a pointer for the message
-equ message_ptr, 0x00
+	#set proc::xPblze6::scrpdSize, 	64 ; [64, 128, 256]
+	#set proc::xPblze6::clkFreq, 		100000000 ; in Hz
+	
+	#set IOdev::BRAM0::en, 			TRUE
+	#set IOdev::BRAM0::type, 			mem
+	#set IOdev::BRAM0::size, 			1024
+	#set instmem::pageSize,			1024
+	#set instmem::pageCount, 			1
+	#set instmem::sharedMemLocation, 	loMem ;[ hiMem, loMem ]
+	#set IOdev::BRAM0::value, 			instMem
+	
+	#set IOdev::BRAM0::vhdlEn,			TRUE
+	#set IOdev::BRAM0::vhdlEntityName,	"BRAM0"
+	#set IOdev::BRAM0::vhdlTmplFile,	"ROM_form.vhd"
+	#set IOdev::BRAM0::vhdlTargetFile,	"BRAM0.vhd "
+	#set ASM::dfltCharset, utf-8
+	
+#endIf
 
-; Define the message to be encrypted
-equ message, "HELLO WORLD"
+#ORG ADDR, 0
+#EQU message "This is a string"
+#EQU message_ptr 0x00
+#EQU binary_representation 0
+#EQU binary_string_counter 0
+LOAD s0, message'len ; s0 = 16
+#EQU binary_string " "
+LOAD s1, 0
+;#EQU message_length s0
+;convert message to its binary representation
+loop:	LOAD s2, message[s1]
+		CALL bin_conversion
+		WRMEM s2, binary_representation
+		LOAD s3, binary_string_counter
+		WRMEM s2, binary_string[s3]
+		ADD s3, 1
+		WRMEM s3, binary_string_counter
+		ADD s1, 1 ; increment the loop counter
+		COMP s1, s0 ; compare with message length if end of the string has been reached
+		JUMP Z, endloop
+		JUMP loop
+endloop:
 
-; Define a counter
-equ i, 0
+;simon_alg:
 
-; Loop to load the message into memory
-load s0, i
-
-loop:
-    ; Get the next character in the message
-    input s1, message + s0
-
-    ; Store the character in memory
-    store s1, message_ptr + s0
-
-    ; Increment the counter
-    add s0, 1
-
-    ; Check if we have reached the end of the message
-    compare s0, 11
-    jump_not_equal loop
-
-
-; PicoBlaze_2 - Random Stream Generation
-
-; Set the seed value for the LFSR
-load s0, 12h
-
-; Loop to generate the random stream
-start_loop:
-    ; Shift the LFSR
-    shiftl s0
-    input s0, (s0)
-    ; XOR the output bit with the tap bits
-    xor s0, tap_6
-    xor s0, tap_5
-    xor s0, tap_4
-    xor s0, tap_8
-    ; Store the output bit in memory
-    store s0, random_stream_ptr
-    ; Increment the memory pointer
-    add random_stream_ptr, 1
-    ; Loop until desired number of random bits are generated
-    branch start_loop, end_loop
-end_loop:
-
-; PicoBlaze_1 - Vernam Cipher Encryption
-
-; Read the message from memory
-load s0, message_ptr
-input s0, (s0)
-
-; Read the key from memory
-load s1, key_ptr
-input s1, (s1)
-
-; Perform the XOR operation to generate the ciphertext
-xor s0, s1
-
-; Write the ciphertext to memory
-store s0, ciphertext_ptr
+bin_conversion: AND s2, 0x01
+				SR0 s2
+				RET
