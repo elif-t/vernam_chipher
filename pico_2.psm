@@ -13,11 +13,35 @@
 	#set IOdev::BRAM0::value, 			instMem
 	
 	#set IOdev::BRAM0::vhdlEn,			TRUE
-	#set IOdev::BRAM0::vhdlEntityName,	"BRAM0"
+	#set IOdev::BRAM0::vhdlEntityName,	"BRAM1"
 	#set IOdev::BRAM0::vhdlTmplFile,	"ROM_form.vhd"
-	#set IOdev::BRAM0::vhdlTargetFile,	"BRAM0.vhd" ; target file - will be created
+	#set IOdev::BRAM0::vhdlTargetFile,	"BRAM1.vhd" ; target file - will be created
 	
 #endIf
-#ORG ADDR, 0 	;instruction starts from 0 address
-	
-pico_two: LOAD sF, 0x12
+
+#ORG ADDR,0
+#EQU key, 0x12
+
+pico_2:	LOAD s0, key
+		LOAD s1, key	;will store upper 4 bits of key
+		LOAD s2, key	;will store lower 4 bits of key
+		SR0 s1
+		SR0 s1
+		SR0 s1
+		SR0 s1
+		AND s2, 0x0F
+		;apply key-dependent non-linear trans. to s1 using s2
+		ROL s1			;s1 will be shifted n times
+		XOR s1, s2		
+		WRPRT s1, 20
+		ROL s1			
+		XOR s1, s2
+		WRPRT s1, 21
+		ROL s1
+		XOR s1, s2
+		WRPRT s1,22
+		ROL s1
+		XOR s1, s2
+		WRPRT s1, 23
+		
+end: JUMP end
