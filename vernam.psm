@@ -26,33 +26,37 @@
 	#EQU message4 "e"
 	#EQU key , 0x12
 	#EQU key_2 , 0x20
+	#EQU mem_, 0x00
+	
 	LOAD sF, key ; load seed value into accumulator
 	LOAD sE, key_2
 	
 	LOAD s0, message1
-	ROL sF ; simon key gen
-	ROL sE ; simon key gen
-	XOR sF, sE ; simon key gen
+	CALL simon
 	LOAD s5, s0
+	RDMEM sF, mem_
 	XOR s5, sF ; vernam ency.
 	
 	LOAD s1, message2
-	ROL sF
-	ROL sE
-	XOR sF, sE
+	CALL simon
 	LOAD s6, s1
+	RDMEM sF, mem_
 	XOR s6, sF ; vernam ency.
 	
 	LOAD s2, message3
-	ROL sF
-	ROL sE
-	XOR sF, sE
+	CALL simon
 	LOAD s7, s2
+	RDMEM sF, mem_
 	XOR s7, sF ; vernam ency.
 	
 	LOAD s3, message4
-	ROL sF
-	ROL sE
-	XOR sF, sE
+	CALL simon
 	LOAD s8, s3
+	RDMEM sF, mem_
 	XOR s8, sF ; vernam ency.
+	
+simon:	ROL sF
+		ROL sE
+		XOR sF, sE
+		WRMEM sF, mem_
+		RET
