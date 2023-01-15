@@ -56,7 +56,7 @@
 	XOR s8, sF ; vernam ency.
 	
 simon:	ROL sF
-		ROL sE
-		XOR sF, sE
-		WRMEM sF, mem_
-		RET
+	ROL sE
+	XOR sF, sE
+	WRMEM sF, mem_
+	RET
