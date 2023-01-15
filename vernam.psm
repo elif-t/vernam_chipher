@@ -24,10 +24,6 @@ pico_one: 		RDPRT s0, 0 	; Load value of h
 			RDPRT s1, 1 	; Load value of o
 			RDPRT s2, 2 	; Load value of p
 			RDPRT s3, 3 	; Load value of e	
-				
-			INT ENABLE
-			LOAD s4, s0	; delay for interrupt
-			LOAD s4, s0
 					
 			WRPRT s4, 4 	; write results to RAM
 			WRPRT s5, 5
