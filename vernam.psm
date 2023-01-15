@@ -18,15 +18,15 @@
 	#set IOdev::BRAM0::vhdlTargetFile,	"BRAM0.vhd" ; target file - will be created
 	
 #endIf
-	#ORG ADDR, 0 	;instruction starts from 0 address
+#ORG ADDR, 0 	;instruction starts from 0 address
 	
-pico_one: 	RDPRT s0, 0 	; Load value of h
+pico_one: 		RDPRT s0, 0 	; Load value of h
 			RDPRT s1, 1 	; Load value of o
 			RDPRT s2, 2 	; Load value of p
 			RDPRT s3, 3 	; Load value of e	
 				
 			INT ENABLE
-			LOAD s4, s0		; delay for interrupt
+			LOAD s4, s0	; delay for interrupt
 			LOAD s4, s0
 					
 			WRPRT s4, 4 	; write results to RAM
@@ -36,19 +36,19 @@ pico_one: 	RDPRT s0, 0 	; Load value of h
 			
 end: JUMP end 				; Final instruction
 
-v_cipher:	LOAD s4, s0 	; load message values to new reg to compute cipher
+v_cipher:		LOAD s4, s0 	; load message values to new reg to compute cipher
 			LOAD s5, s1
 			LOAD s6, s2
 			LOAD s7, s3
-			XOR s4, sA
+			XOR s4, sA	; computes cipher
 			XOR s5, sB
-			XOR	s6, sC
+			XOR s6, sC
 			XOR s7, sD
 			RET
 
 ;interrupt used to read keys from pico2 and compute cipher text			
-ISR:	NOP
-		NOP 				; dummy instruction
+ISR:		NOP
+		NOP 			; dummy instruction
 		RDPRT sA, 20		; read keys from picoblaze2
 		RDPRT sB, 21
 		RDPRT sC, 22
