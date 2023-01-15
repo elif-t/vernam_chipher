@@ -33,15 +33,15 @@ pico_2:	LOAD s0, key
 		;apply key-dependent non-linear trans. to s1 using s2
 		ROL s1			;s1 will be shifted n times
 		XOR s1, s2		
-		WRPRT s1, 20
+		WRMEM s1, 20
 		ROL s1			
 		XOR s1, s2
-		WRPRT s1, 21
+		WRMEM s1, 21
 		ROL s1
 		XOR s1, s2
-		WRPRT s1,22
+		WRMEM s1,22
 		ROL s1
 		XOR s1, s2
-		WRPRT s1, 23
+		WRMEM s1, 23
 		
 end: JUMP end
