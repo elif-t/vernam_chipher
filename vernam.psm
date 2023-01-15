@@ -1,62 +1,40 @@
-#ifDef proc::xPblze6
+pico_one: 	RDPRT s0, 0 	; Load value of h
+			RDPRT s1, 1 	; Load value of o
+			RDPRT s2, 2 	; Load value of p
+			RDPRT s3, 3 	; Load value of e
+			
+			LOAD s4, s0 	; load message values to new reg to compute cipher
+			LOAD s5, s1
+			LOAD s6, s2
+			LOAD s7, s3
+			
+v_cipher:	XOR s4, sA
+			XOR s5, sB
+			XOR	s6, sC
+			XOR s7, sD
+						
+			WRPRT s4, 4 	; write results to RAM
+			WRPRT s5, 5
+			WRPRT s6, 6
+			WRPRT s7, 7
+			
+end: JUMP end 				; Final instruction
 
-	#set proc::xPblze6::scrpdSize, 	64 ; [64, 128, 256]
-	#set proc::xPblze6::clkFreq, 		100000000 ; in Hz
-	
-	#set IOdev::BRAM0::en, 			TRUE
-	#set IOdev::BRAM0::type, 			mem
-	#set IOdev::BRAM0::size, 			1024
-	#set instmem::pageSize,			1024
-	#set instmem::pageCount, 			1
-	#set instmem::sharedMemLocation, 	loMem ;[ hiMem, loMem ]
-	#set IOdev::BRAM0::value, 			instMem
-	
-	#set IOdev::BRAM0::vhdlEn,			TRUE
-	#set IOdev::BRAM0::vhdlEntityName,	"BRAM0"
-	#set IOdev::BRAM0::vhdlTmplFile,	"ROM_form.vhd"
-	#set IOdev::BRAM0::vhdlTargetFile,	"BRAM0.vhd "
-	;#set ASM::dfltCharset, utf-8
-	
-#endIf
-
-	#ORG ADDR, 0
-	#EQU message1 "h"
-	#EQU message2 "o"
-	#EQU message3 "p"
-	#EQU message4 "e"
-	#EQU key , 0x12
-	#EQU key_2 , 0x20
-	#EQU mem_, 0x00
-	
-	LOAD sF, key ; load seed value into accumulator
-	LOAD sE, key_2
-	
-	LOAD s0, message1
-	CALL simon
-	LOAD s5, s0
-	RDMEM sF, mem_
-	XOR s5, sF ; vernam ency.
-	
-	LOAD s1, message2
-	CALL simon
-	LOAD s6, s1
-	RDMEM sF, mem_
-	XOR s6, sF ; vernam ency.
-	
-	LOAD s2, message3
-	CALL simon
-	LOAD s7, s2
-	RDMEM sF, mem_
-	XOR s7, sF ; vernam ency.
-	
-	LOAD s3, message4
-	CALL simon
-	LOAD s8, s3
-	RDMEM sF, mem_
-	XOR s8, sF ; vernam ency.
-	
-simon:	ROL sF
-	ROL sE
-	XOR sF, sE
-	WRMEM sF, mem_
-	RET
+;interrupt used to read keys from pico2 and compute cipher text			
+ISR:	NOP
+		NOP 				; dummy instruction
+		RDPRT sA, 20		; read keys from picoblaze2
+		RDPRT sB, 21
+		RDPRT sC, 22
+		RDPRT sD, 23
+		
+		CALL v_cipher
+		
+		WRPRT s4, 0x04
+		WRPRT s5, 0x05
+		WRPRT s6, 0x06
+		WRPRT s7, 0x07
+		
+		RETI ENABLE 		; return from interrupt
+		#ORG ADDR, 4095 	; interrupt address
+		JUMP ISR
